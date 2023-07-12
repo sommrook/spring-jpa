@@ -22,6 +22,7 @@ public class Member {
     private Address address;
 
     // Order class 의 member 에 mapping
+    // 1:N => 한 member 는 여러 order 를 할 수 있다.
     @OneToMany(mappedBy = "member")
     private List<Order> orders = new ArrayList<>();
 }
