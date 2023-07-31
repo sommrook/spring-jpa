@@ -37,6 +37,7 @@ public class MemberApiController {
     @Data
     @AllArgsConstructor
     static class Result<T> {
+        // Generic => List<MemberDto>가 아닌 다른 타입에도 사용하기 위함
         private int count;
         private T data;
     }
