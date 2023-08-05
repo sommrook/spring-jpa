@@ -99,7 +99,6 @@ public class OrderRepository {
                         " join fetch o.delivery d", Order.class
         ).getResultList();
     }
-
     public List<OrderSimpleQueryDto> findOrderDtos() {
         return em.createQuery(
                 "select new jpabook.jpashop.repository.OrderSimpleQueryDto(o.id, m.name, o.orderDate, o.status, d.address) from Order o" +
@@ -109,12 +108,24 @@ public class OrderRepository {
     }
 
     public List<Order> findAllWithItem() {
+        // application 에 데이터를 다 가져온 후 return 객체가 같은 id 이면 중복을 제거해준다.
         return em.createQuery(
-                "select o from Order o" +
+                "select distinct o from Order o" +
                         " join fetch o.member m" +
                         " join fetch o.delivery d" +
                         " join fetch o.orderItems oi" +
                         " join fetch oi.item i", Order.class)
+                .getResultList();
+    }
+
+    public List<Order> findAllWithMemberDelivery(int offset, int limit) {
+        // default_batch_fetch_size 옵션으로 인해 fetch join 하지 않은 객체에 대해서 갯수만큼 in query로 가져온다.
+        return em.createQuery(
+                "select o from Order o" +
+                        " join fetch o.member m" +
+                        " join fetch o.delivery d", Order.class)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
                 .getResultList();
     }
 }
