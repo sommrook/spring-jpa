@@ -32,6 +32,7 @@ public class OrderApiController {
     
     @GetMapping("/api/v1/orders")
     public List<Order> ordersV1() {
+        // 1. 엔티티 직접 노출
         List<Order> all = orderRepository.findAllString(new OrderSearch());
         for (Order order : all) {
             order.getMember().getName();
@@ -45,6 +46,7 @@ public class OrderApiController {
 
     @GetMapping("/api/v2/orders")
     public List<OrderDto> orderV2() {
+        // 2. DTO 로 변환 후 노출
         List<Order> orders = orderRepository.findAllString(new OrderSearch());
         return orders.stream()
                 .map(o -> new OrderDto(o))
@@ -53,6 +55,7 @@ public class OrderApiController {
 
     @GetMapping("/api/v3/orders")
     public List<OrderDto> orderV3() {
+        // 3. fetch join 사용 -> paging 사용 X (collection 도 fetch join 함)
         List<Order> orders = orderRepository.findAllWithItem();
 
         for (Order order : orders){
@@ -66,6 +69,7 @@ public class OrderApiController {
     @GetMapping("/api/v3.1/orders")
     public List<OrderDto> orderV3_page(@RequestParam(value="offset", defaultValue = "0") int offset,
                                        @RequestParam(value = "limit", defaultValue = "100") int limit) {
+        // 3.1. fetch join 사용 -> paging O (collection 은 fetch join 하지 않고 지연 로딩함 => "default_batch_fetch_size")
         List<Order> orders = orderRepository.findAllWithMemberDelivery(offset, limit);
 
         return orders.stream()
@@ -75,16 +79,19 @@ public class OrderApiController {
 
     @GetMapping("/api/v4/orders")
     public List<OrderQueryDto> ordersV4(){
+        // 4. DTO로 직접 조회 -> Order 갯수 만큼 OrderItem 조회 쿼리 날라감
         return orderQueryRepository.findOrderQueryDtos();
     }
 
     @GetMapping("/api/v5/orders")
     public List<OrderQueryDto> ordersV5(){
+        // 5. DTO로 직접 조회 -> Order 구한 후 in 절로 OrderItem 한번에 조회
         return orderQueryRepository.findAllByDto_optimization();
     }
 
     @GetMapping("/api/v6/orders")
     public List<OrderQueryDto> ordersV6(){
+        // 6. 쿼리 한번으로 조회 -> 대신 페이징에서는 사용할 수 없다.
         List<OrderFlatDto> flats = orderQueryRepository.findAllByDto_flat();
 
         return flats.stream()
